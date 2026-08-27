@@ -1,0 +1,17 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "plugin": [
+    "@dietrichgebert/ponytail"
+  ],
+  "mcp": {
+    "r-analytics": {
+      "type": "local",
+      "command": [
+        "Rscript",
+        "-e",
+        "mcptools::start_mcp_server()"
+      ],
+      "enabled": true
+    }
+  }
+}

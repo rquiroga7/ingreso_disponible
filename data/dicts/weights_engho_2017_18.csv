@@ -1,0 +1,24 @@
+nivel,codigo,nombre,peso
+division,01,"Alimentos y bebidas no alcoholicas",22.7
+division,02,"Bebidas alcoholicas y tabaco",1.9
+division,03,"Prendas de vestir y calzado",6.8
+division,04,"Vivienda agua electricidad gas y otros combustibles",14.5
+division,05,"Equipamiento y mantenimiento del hogar",5.4
+division,06,"Salud",6.4
+division,07,"Transporte",14.3
+division,08,"Informacion y comunicacion",5.2
+division,09,"Recreacion y cultura",8.6
+division,10,"Educacion",3.1
+division,11,"Restaurantes y hoteles",6.6
+division,12,"Bienes y servicios varios",4.3
+grupo,04.1,"Alquileres efectivos",5.0
+grupo,04.2,"Conservacion y reparacion de la vivienda",1.1
+grupo,04.3,"Agua y servicios de la vivienda",2.5
+grupo,04.4,"Electricidad gas y otros combustibles",5.9
+grupo,06.1,"Productos medicinales",2.7
+grupo,06.2,"Servicios ambulatorios",1.3
+grupo,06.3,"Servicios de hospital",0.1
+grupo,06.4,"Seguros medicos (prepagas)",2.3
+grupo,07.1,"Adquisicion de vehiculos",3.0
+grupo,07.2,"Funcionamiento de vehiculos",8.1
+grupo,07.3,"Servicios de transporte",3.2

@@ -1,0 +1,23 @@
+{
+  "version": 1,
+  "skills": {
+    "designing-tidy-r-functions": {
+      "source": "jsperger/llm-r-skills",
+      "sourceType": "github",
+      "skillPath": "skills/designing-tidy-r-functions/SKILL.md",
+      "computedHash": "a4d266afb5f8799d8d1fe9f5149caa09647ecd745b0beddd8eafe141a4e544a5"
+    },
+    "r-code": {
+      "source": "wranglezone/stbl",
+      "sourceType": "github",
+      "skillPath": ".github/skills/r-code/SKILL.md",
+      "computedHash": "c086f3d7e275445dc8f6b3c206d5c78b7af00b414f61d092faa484bb0c345e96"
+    },
+    "tidy-evaluation": {
+      "source": "jsperger/llm-r-skills",
+      "sourceType": "github",
+      "skillPath": "skills/tidy-evaluation/SKILL.md",
+      "computedHash": "383e153d99fee436ec7bdb115d07b0f80894ef0ca4a43b41c5de2c65a1ac1808"
+    }
+  }
+}
