@@ -41,22 +41,22 @@ graficar <- function(series, titulo, archivo, nota) {
   fechas <- as.Date(paste0(names(series[[1]]), "-01"))
   mes_lbl <- format(fechas, "%b-%y")
   lineas_nota <- strwrap(nota, width = 178)
-  png(file.path(repo_root, "output", archivo), width = 1250, height = 820, res = 110)
-  par(mar = c(5.2 + 0.75 * length(lineas_nota), 4, 4, 6))
+  png(file.path(repo_root, "output", archivo), width = 1100, height = 825, res = 110)
+  par(mar = c(5.2 + 0.75 * length(lineas_nota), 4, 4, 1))
   ylim <- range(unlist(series), na.rm = TRUE)
   plot(fechas, series[[1]], type = "n", ylim = ylim,
-       xlim = range(fechas) + c(-5, 56), xaxt = "n", xlab = "", ylab = "",
+       xlim = range(fechas) + c(-5, 65), xaxt = "n", xlab = "", ylab = "",
        main = titulo)
   mtext("Índice", side = 2, line = 2.2, cex = 1.3)
   abline(h = axTicks(2), col = "grey90")
   axis(1, at = fechas, labels = mes_lbl, las = 2, cex.axis = 0.85)
   for (seg in names(series)) {
     lines(fechas, series[[seg]], col = colores[[seg]], lwd = 2.5)
-    text(tail(fechas, 1) + 30, tail(series[[seg]], 1), sprintf("%.1f", tail(series[[seg]], 1)),
+    text(tail(fechas, 1) + 40, tail(series[[seg]], 1), sprintf("%.1f", tail(series[[seg]], 1)),
          adj = c(0.5, 0.5), cex = 1.1, font = 2, col = colores[[seg]])
   }
   abline(h = 100, col = "grey80", lty = 2)
-  legend("bottomleft", bty = "n", lwd = 2.5, col = colores[names(series)],
+  legend("topright", bty = "n", lwd = 2.5, col = colores[names(series)],
          legend = etiquetas[names(series)])
   for (i in seq_along(lineas_nota)) {
     mtext(lineas_nota[i], side = 1, line = 4.8 + (i - 1) * 0.75, cex = 0.62, adj = 0)

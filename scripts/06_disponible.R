@@ -140,7 +140,7 @@ cols <- c(ingreso_real_ipc2004 = "grey60", ingreso_real_ipc2017 = "black", ingre
 ylim <- range(c(serie_a$valor, serie_b$valor, serie_c$valor))
 
 for (variante in c("con_anclas", "sin_anclas")) {
-  png(file.path(repo_root, "output", sprintf("grafico_equilibra_%s.png", variante)), width = 1250, height = 750, res = 110)
+  png(file.path(repo_root, "output", sprintf("grafico_equilibra_%s.png", variante)), width = 1100, height = 825, res = 110)
   nota <- paste(
     "Ingreso real = ingreso del universo deflactado por el IPC. Ingreso disponible = ingreso real menos gastos fijos (alquiler, expensas, tarifas de luz/gas/agua, transporte, comunicaciones, educación y medicina prepaga).",
     "Universo 14,5M de personas: asalariados privados registrados, empleados públicos y jubilados, ponderados por masa de ingreso SIPA (priv 64% / pub 23% / jub 12%).",
@@ -148,8 +148,8 @@ for (variante in c("con_anclas", "sin_anclas")) {
     "IPC 2017/18: reponderación ENGHo 2017/18 con división 04 (vivienda) por grupos CABA. Gasto fijo: g0 = 31% del ingreso (ENGHo 2017/18), actualizado con la inflación de la canasta fija vs el nivel general desde oct-2018.",
     "Base: promedio ene-23:sep-23 = 100. Por Rodrigo Quiroga @rquiroga777"
   )
-  par(mar = c(5.2 + 0.75 * length(strwrap(nota, width = 178)), 4, 4, 6))
-  xlim <- range(serie_a$fecha) + c(-5, 56)  # margen derecho solo hasta el borde de las etiquetas
+  par(mar = c(5.2 + 0.75 * length(strwrap(nota, width = 178)), 4, 4, 1))
+  xlim <- range(serie_a$fecha) + c(-5, 65)  # margen derecho solo hasta el borde de las etiquetas
   plot(serie_a$fecha, serie_a$valor, type = "n", ylim = ylim, xlim = xlim,
        xaxt = "n", xlab = "", ylab = "Índice (prom ene-23:sep-23 = 100)",
        main = "Ingreso real registrado y disponible (14,5M personas)\nReconstrucción desde microdatos EPH + registros administrativos")
@@ -165,14 +165,20 @@ for (variante in c("con_anclas", "sin_anclas")) {
       puntos <- as.Date(paste0(a_s$month, "-01"))
       points(puntos, a_s$value, pch = 4, col = cols[[sr]], lwd = 2, cex = 1.2)
     }
-    legend("left", bty = "n", pch = 4, "anclas Equilibra")
+    legend("topright", bty = "n",
+           lwd = c(2.5, 2.5, 2.5, NA), lty = c(1, 1, 1, NA), pch = c(NA, NA, NA, 4),
+           col = c(cols, "black"),
+           legend = c("Ingreso Real (IPC INDEC ENGHo 2004/05)", "Ingreso Real (IPC ENGHo 2017/18)",
+                      "Ingreso Disponible (IPC ENGHo 2017/18)", "Anclas Equilibra"))
+  } else {
+    legend("topright", bty = "n", lwd = 2.5, col = cols,
+           legend = c("Ingreso Real (IPC INDEC ENGHo 2004/05)", "Ingreso Real (IPC ENGHo 2017/18)",
+                      "Ingreso Disponible (IPC ENGHo 2017/18)"))
   }
-  x_etiqueta <- tail(serie_a$fecha, 1) + 30  # desplazada a la derecha para no pisar las lineas
+  x_etiqueta <- tail(serie_a$fecha, 1) + 40  # desplazada a la derecha para no pisar las lineas
   text(x_etiqueta, tail(serie_a$valor, 1), sprintf("%.1f", tail(serie_a$valor, 1)), adj = c(0.5, 0.5), cex = 1.05, font = 2, col = "grey40")
   text(x_etiqueta, tail(serie_b$valor, 1), sprintf("%.1f", tail(serie_b$valor, 1)), adj = c(0.5, 0.5), cex = 1.05, font = 2, col = "black")
   text(x_etiqueta, tail(serie_c$valor, 1), sprintf("%.1f", tail(serie_c$valor, 1)), adj = c(0.5, 0.5), cex = 1.05, font = 2, col = "red2")
-  legend("topright", bty = "n", lwd = 2.5, col = cols,
-         legend = c("Ingreso Real (IPC INDEC ENGHo 2004/05)", "Ingreso Real (IPC ENGHo 2017/18)", "Ingreso Disponible (IPC ENGHo 2017/18)"))
   lineas_nota <- strwrap(nota, width = 178)
   for (i in seq_along(lineas_nota)) {
     mtext(lineas_nota[i], side = 1, line = 4.6 + (i - 1) * 0.7, cex = 0.62, adj = 0)

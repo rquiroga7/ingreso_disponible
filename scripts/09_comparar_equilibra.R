@@ -80,8 +80,8 @@ for (m in c("2026-04", "2026-05", "2026-06")) {
 }
 
 ## Grafico comparativo total
-png(file.path(repo_root, "output", "grafico_comparacion_equilibra.png"), width = 1250, height = 750, res = 110)
-par(mar = c(6, 4, 4, 6))
+png(file.path(repo_root, "output", "grafico_comparacion_equilibra.png"), width = 1100, height = 825, res = 110)
+par(mar = c(6, 4, 4, 1))
 meses_lbl <- format(seq(as.Date("2026-03-01"), as.Date("2026-06-01"), by = "month"), "%b-26")
 fechas <- as.Date(paste0(c("2026-03", "2026-04", "2026-05", "2026-06"), "-01"))
 plot(fechas, eq_total_real, type = "b", pch = 16, col = "black", ylim = c(80, 95),
@@ -91,7 +91,7 @@ axis(1, at = fechas, labels = meses_lbl, las = 2)
 lines(fechas, eq_total_disp, type = "b", pch = 16, col = "red2", lwd = 2)
 lines(fechas, B[c("2026-03", "2026-04", "2026-05", "2026-06")], type = "b", pch = 1, col = "black", lty = 2)
 lines(fechas, C[c("2026-03", "2026-04", "2026-05", "2026-06")], type = "b", pch = 1, col = "red2", lty = 2)
-legend("bottomleft", bty = "n", lwd = 2,
+legend("topright", bty = "n", lwd = 2,
        legend = c("Real Equilibra (puntos)", "Disponible Equilibra (puntos)", "Real nuestro (linea)", "Disponible nuestro (linea)"),
        col = c("black", "red2", "black", "red2"), lty = c(1, 1, 2, 2), pch = c(16, 16, 1, 1))
 dev.off()

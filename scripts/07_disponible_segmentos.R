@@ -111,7 +111,7 @@ write.csv(data.frame(
   universidades = as.numeric(disp_univ)
 ), file.path(repo_root, "output", "serie_disponible_segmentos.csv"), row.names = FALSE)
 
-png(file.path(repo_root, "output", "grafico_disponible_segmentos.png"), width = 1250, height = 820, res = 110)
+png(file.path(repo_root, "output", "grafico_disponible_segmentos.png"), width = 1100, height = 825, res = 110)
 nota <- paste(
   "Ingreso disponible = ingreso del segmento menos gastos fijos (alquiler, expensas, tarifas de luz/gas/agua, transporte, comunicaciones, educación y medicina prepaga), deflactado por IPC.",
   "Ingresos: Índice de Salarios INDEC — privados registrados; subsectores público nacional (sin universidades) y provincial (incluye municipales), series desde ene-2022.",
@@ -119,11 +119,11 @@ nota <- paste(
   "Base: promedio ene-23:sep-23 = 100. Por Rodrigo Quiroga @rquiroga777"
 )
 lineas_nota <- strwrap(nota, width = 178)
-par(mar = c(5.2 + 0.75 * length(lineas_nota), 4, 4, 6))
+par(mar = c(5.2 + 0.75 * length(lineas_nota), 4, 4, 1))
 mes_lbl <- format(fechas, "%b-%y")
 plot(fechas, disp_priv, type = "n",
      ylim = range(c(disp_priv, disp_nac, disp_prov, disp_univ)) + c(-1, 1),
-     xlim = range(fechas) + c(-5, 56), xaxt = "n", xlab = "", ylab = "",
+     xlim = range(fechas) + c(-5, 65), xaxt = "n", xlab = "", ylab = "",
      main = "Ingreso disponible por segmento (IPC ENGHo 2017/18)\nPrivados registrados, público nacional, provincial y universidades")
 mtext("Índice", side = 2, line = 2.2, cex = 1.3)
 abline(h = axTicks(2), col = "grey90")
@@ -133,11 +133,11 @@ lines(fechas, disp_nac, col = "blue3", lwd = 2.5)
 lines(fechas, disp_prov, col = "darkorange2", lwd = 2.5)
 lines(fechas, disp_univ, col = "darkgreen", lwd = 2.5)
 abline(h = 100, col = "grey80", lty = 2)
-  text(tail(fechas, 1) + 30, tail(disp_priv, 1), sprintf("%.1f", tail(disp_priv, 1)), adj = c(0.5, 0.5), cex = 1.1, font = 2, col = "grey30")
-  text(tail(fechas, 1) + 30, tail(disp_nac, 1), sprintf("%.1f", tail(disp_nac, 1)), adj = c(0.5, 0.5), cex = 1.1, font = 2, col = "blue3")
-  text(tail(fechas, 1) + 30, tail(disp_prov, 1), sprintf("%.1f", tail(disp_prov, 1)), adj = c(0.5, 0.5), cex = 1.1, font = 2, col = "darkorange2")
-  text(tail(fechas, 1) + 30, tail(disp_univ, 1), sprintf("%.1f", tail(disp_univ, 1)), adj = c(0.5, 0.5), cex = 1.1, font = 2, col = "darkgreen")
-legend("bottomleft", bty = "n", lwd = 2.5, col = c("grey40", "blue3", "darkorange2", "darkgreen"),
+  text(tail(fechas, 1) + 40, tail(disp_priv, 1), sprintf("%.1f", tail(disp_priv, 1)), adj = c(0.5, 0.5), cex = 1.1, font = 2, col = "grey30")
+  text(tail(fechas, 1) + 40, tail(disp_nac, 1), sprintf("%.1f", tail(disp_nac, 1)), adj = c(0.5, 0.5), cex = 1.1, font = 2, col = "blue3")
+  text(tail(fechas, 1) + 40, tail(disp_prov, 1), sprintf("%.1f", tail(disp_prov, 1)), adj = c(0.5, 0.5), cex = 1.1, font = 2, col = "darkorange2")
+  text(tail(fechas, 1) + 40, tail(disp_univ, 1), sprintf("%.1f", tail(disp_univ, 1)), adj = c(0.5, 0.5), cex = 1.1, font = 2, col = "darkgreen")
+legend("topright", bty = "n", lwd = 2.5, col = c("grey40", "blue3", "darkorange2", "darkgreen"),
        legend = c("Asalariados privados registrados", "Público nacional (sin universidades)", "Público provincial y municipal", "Universidades"))
 for (i in seq_along(lineas_nota)) {
   mtext(lineas_nota[i], side = 1, line = 4.8 + (i - 1) * 0.75, cex = 0.62, adj = 0)
