@@ -50,12 +50,17 @@ extender_ist <- function(idx, mm_ist) {
 }
 pub <- extender_ist(rebase_index(admin$ist_nom_pub, admin$mes), mm_ist_pub)
 
-# jubilados: 2017..2022 con el haber minimo encadenado al 2023-01 del pipeline;
-# 2023+ = serie existente (EPH interpolada + cola de haber minimo)
+# jubilados: 2017..2022 con el haber minimo + bono ANSES encadenado al 2023-01 del
+# pipeline; 2023+ = serie existente (EPH interpolada + cola de haber minimo + bono)
 jub_ex <- setNames(ynom_ex$jub_rel, substr(ynom_ex$fecha, 1, 7))
 minimo <- setNames(admin$haber_minimo, admin$mes)
+bono_an <- read.csv(file.path(repo_root, "data", "work", "bono_anses.csv"))
+bono_an <- setNames(bono_an$bono, bono_an$mes)
+bono_an <- ifelse(is.na(bono_an[admin$mes]), 0, bono_an[admin$mes])
+names(bono_an) <- admin$mes
+minimo_bono <- setNames(admin$haber_minimo + bono_an, admin$mes)
 pre <- meses[meses < "2023-01"]
-jub_pre <- setNames(jub_ex[["2023-01"]] * minimo[pre] / minimo[["2023-01"]], pre)
+jub_pre <- setNames(jub_ex[["2023-01"]] * minimo_bono[pre] / minimo_bono[["2023-01"]], pre)
 jub <- c(jub_pre, jub_ex[meses[meses >= "2023-01"]])
 
 # pesos por masa de ingreso SIPA (idem script 03)

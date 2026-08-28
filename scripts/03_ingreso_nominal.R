@@ -111,12 +111,16 @@ jm <- setNames(
   target
 )
 cc <- max(names(jt))
-# cola de jubilados con el HABER MINIMO (jubilaciones), no el IST publico:
-# revision 2026-08-25 — el IST publico incluye el aumento universitario de jun-26
-# (+21%), que las jubilaciones no reciben; el haber minimo refleja la movilidad.
-minimo <- rebase_index(admin$haber_minimo, admin$mes)
+# cola de jubilados con el HABER MINIMO + BONO ANSES (jubilaciones), no el IST publico:
+# revision 2026-08-28 — se suma el bono extraordinario ($7k en sept-22 -> $70k fijo desde
+# mar-24; consta hasta jun-26), que es parte del ingreso efectivo de la jubilacion minima.
+# El IST publico incluye el aumento universitario de jun-26 (+21%), que las jubilaciones
+# no reciben; el haber minimo + bono refleja la movilidad real.
+bono <- read.csv(file.path(repo_root, "data", "work", "bono_anses.csv"))
+bono <- setNames(bono$bono, bono$mes)
+minimo_bono <- setNames(admin$haber_minimo + bono[admin$mes], admin$mes)
 for (m in target[target > cc]) {
-  jm[[m]] <- jm[[cc]] * minimo[[m]] / minimo[[cc]]
+  jm[[m]] <- jm[[cc]] * minimo_bono[[m]] / minimo_bono[[cc]]
 }
 jm <- jm / mean(jm[ventana]) * 100
 
