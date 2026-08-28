@@ -196,7 +196,53 @@ for (i in seq_along(lineas_nota)) {
   mtext(lineas_nota[i], side = 1, line = 4.6 + (i - 1) * 0.7, cex = 0.62, adj = 0)
 }
 dev.off()
+
+## Variante con mora de familias BCRA (eje derecho)
+mora <- read.csv(file.path(repo_root, "data", "work", "bcra_mora_familias.csv"))
+mora$fecha <- as.Date(mora$fecha)
+mora$mes <- substr(mora$fecha, 1, 7)
+mora <- mora[mora$mes >= desde & mora$mes <= hasta, ]
+mora_col <- "blue3"
+mora_base <- round(mean(mora$mora_familias[mora$mes %in% ventana]))
+k <- 2
+mora_primary <- 100 + (mora$mora_familias - mora_base) * k
+ticks_mora <- seq(0, 14, 2)
+tick_pos <- 100 + (ticks_mora - mora_base) * k
+
+nota_bcra <- paste(
+  "Ingreso disponible = ingreso real (del universo deflactado por el IPC) menos gastos fijos (alquiler, expensas, tarifas de luz/gas/agua, transporte, comunicaciones, educación y medicina prepaga).",
+  "Universo 14,5M de personas: asalariados privados registrados, empleados públicos y jubilados, ponderados por masa de ingreso SIPA (priv 64% / pub 23% / jub 12%).",
+  "Mora de familias (BCRA, eje derecho, en %): % de la cartera de crédito a hogares en situación irregular. El 100 del eje izquierdo coincide con la mora promedio ene-23:sep-23 (= 2%).",
+  "Ingresos: mediana SIPA (Secretaría de Trabajo, desestacionalizada) para privados; IST público (INDEC) para públicos; EPH + haber mínimo para jubilados. Antes de 2023 el tramo jubilado se extiende con el haber mínimo.",
+  "IPC 2017/18: reponderación ENGHo 2017/18 con división 04 (vivienda) por grupos CABA. Gasto fijo: g0 = 31% del ingreso (ENGHo 2017/18), actualizado con la inflación de la canasta fija vs el nivel general desde oct-2018.",
+  "Base: promedio ene-23:sep-23 = 100. Por Rodrigo Quiroga @rquiroga777"
+)
+png(file.path(repo_root, "output", "grafico_equilibra_desde_2017_bcra.png"), width = 1100, height = 825, res = 110)
+par(mar = c(5.2 + 0.75 * length(strwrap(nota_bcra, width = 178)), 4, 4, 4))
+plot(fechas, A, type = "n", ylim = range(c(as.numeric(C), mora_primary)), xlim = range(fechas) + c(-5, 78),
+     xaxt = "n", xlab = "", ylab = "Índice (prom ene-23:sep-23 = 100)",
+     main = "Ingreso disponible (14,5M personas) y mora de familias\nReconstrucción desde microdatos EPH + registros administrativos — desde 2017")
+abline(h = axTicks(2), col = "grey90")
+abline(v = jan, col = "grey92")
+axis(1, at = jan, labels = format(jan, "%b-%y"), las = 2, cex.axis = 0.8)
+axis(4, at = tick_pos, labels = ticks_mora, las = 0, cex.axis = 0.9)
+mtext("Mora de familias (% de crédito a hogares irregular)", side = 4, line = 2.6, cex = 0.85)
+lines(as.Date(paste0(names(C), "-01")), C, col = cols[["ingreso_disponible_ipc2017"]], lwd = 2.5)
+lines(mora$fecha, mora_primary, col = mora_col, lwd = 2.5)
+abline(h = 100, col = "grey80", lty = 2)
+legend("top", bty = "o", lwd = 2.5,
+       col = c(cols[["ingreso_disponible_ipc2017"]], mora_col),
+       legend = c("Ingreso Disponible (IPC ENGHo 2017/18)", "Mora de familias (BCRA, eje der.)"))
+x_etiqueta <- tail(fechas, 1) + 120
+text(x_etiqueta, tail(C, 1), sprintf("%.1f", tail(C, 1)), adj = c(0.5, 0.5), cex = 1.05, font = 2, col = "red2")
+text(x_etiqueta, tail(mora_primary, 1), sprintf("%.0f%%", tail(mora$mora_familias, 1)), adj = c(0.5, 0.5), cex = 1.05, font = 2, col = mora_col)
+lineas_nota <- strwrap(nota_bcra, width = 178)
+for (i in seq_along(lineas_nota)) {
+  mtext(lineas_nota[i], side = 1, line = 4.6 + (i - 1) * 0.7, cex = 0.62, adj = 0)
+}
+dev.off()
 cat("Gráfico: output/grafico_equilibra_desde_2017.png\n")
+cat("Gráfico: output/grafico_equilibra_desde_2017_bcra.png\n")
 cat("Anclas (base 100):\n")
 for (mm in c("2017-12", "2019-12", "2024-02", "2026-06")) {
   cat(sprintf("  %s: A %.1f | B %.1f | C %.1f\n", mm, A[[mm]], B[[mm]], C[[mm]]))
