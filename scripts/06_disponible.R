@@ -30,6 +30,8 @@
 
 repo_root <- getOption("repo_root", ".")
 source(file.path(repo_root, "R", "rebase_index.R"))
+source(file.path(repo_root, "R", "pipeline_hasta.R"))
+hasta <- pipeline_hasta(repo_root)
 
 realb <- read.csv(file.path(repo_root, "output", "serie_ingreso_real_ipc2017.csv"))
 realb$mes <- substr(realb$fecha, 1, 7)
@@ -55,7 +57,7 @@ write.csv(data.frame(g0 = g0, fuente = "ENGHo 2017/18 base hogares (a priori, si
 
 ## Aperturas IPC CABA: empalme (jul-12..feb-22) + serie nueva (feb-22..jul-26)
 leer_caba <- function(archivo, fila_fechas, fila_datos) {
-  raw <- read.csv(archivo, fileEncoding = "latin1", check.names = FALSE)
+  raw <- read.csv(archivo, fileEncoding = "UTF-8", check.names = FALSE)
   fc <- format(as.Date(as.character(unlist(raw[fila_fechas, -1])), "%m/%d/%Y"), "%Y-%m")
   m <- as.matrix(raw[fila_datos:nrow(raw), -1])
   mode(m) <- "numeric"
@@ -108,13 +110,13 @@ names(ng_hist) <- colnames(pf_hist)
 ref <- "2018-10"
 ratio <- pf_rel_hist / ng_hist
 s_full <- g0 * ratio / ratio[[ref]]
-s <- s_full[names(s_full) >= "2023-01" & names(s_full) <= "2026-06"]
+s <- s_full[names(s_full) >= "2023-01" & names(s_full) <= hasta]
 
 disp_raw <- B[names(s)] * (1 - s)
 disp <- as.numeric(rebase_index(disp_raw, names(s)))
 names(disp) <- names(s)
-cat(sprintf("\nref = %s | s(ref) = %.3f | s en ventana base = %.3f | s jun-26 = %.3f\n",
-            ref, s_full[[ref]], mean(s[names(s) <= "2023-09"]), s[["2026-06"]]))
+cat(sprintf("\nref = %s | s(ref) = %.3f | s en ventana base = %.3f | s %s = %.3f\n",
+            ref, s_full[[ref]], mean(s[names(s) <= "2023-09"]), hasta, s[[hasta]]))
 cat("Anclas disponible (obj 75 / 88 / 83.1) — comparacion, no calibracion:\n")
 for (mm in c("2024-02", "2025-06", "2026-06")) cat(sprintf("  %s: %.1f\n", mm, disp[[mm]]))
 
@@ -135,7 +137,7 @@ serie_b$fecha <- as.Date(serie_b$fecha)
 serie_c <- data.frame(fecha = fechas, valor = as.numeric(disp))
 anclas <- read.csv(file.path(repo_root, "tests", "anchors_equilibra.csv"))
 
-mes_lbl <- format(seq(as.Date("2023-01-01"), as.Date("2026-06-01"), by = "month"), "%b-%y")
+mes_lbl <- format(seq(as.Date("2023-01-01"), as.Date(paste0(hasta, "-01")), by = "month"), "%b-%y")
 cols <- c(ingreso_real_ipc2004 = "grey60", ingreso_real_ipc2017 = "black", ingreso_disponible_ipc2017 = "red2")
 ylim <- range(c(serie_a$valor, serie_b$valor, serie_c$valor))
 

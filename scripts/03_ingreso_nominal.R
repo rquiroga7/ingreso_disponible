@@ -22,10 +22,13 @@ repo_root <- getOption("repo_root", ".")
 source(file.path(repo_root, "R", "read_eph_individual.R"))
 source(file.path(repo_root, "R", "eph_segmento_stats.R"))
 source(file.path(repo_root, "R", "rebase_index.R"))
+source(file.path(repo_root, "R", "pipeline_hasta.R"))
 
-trimestres <- sprintf("t%d%d", rep(23:25, each = 4), 1:4)
+hasta <- pipeline_hasta(repo_root)
+trimestres <- list.dirs(file.path(repo_root, "data", "raw", "eph"), recursive = FALSE)
+trimestres <- sort(basename(trimestres[grepl("^t[0-9]{3}$", basename(trimestres))]))
 ventana <- sprintf("2023-0%d", 1:9)
-target <- format(seq(as.Date("2023-01-01"), as.Date("2026-06-01"), by = "month"), "%Y-%m")
+target <- format(seq(as.Date("2023-01-01"), as.Date(paste0(hasta, "-01")), by = "month"), "%Y-%m")
 
 ## 1) EPH: poblacion por segmento (pesos) y media previsional trimestral
 stats <- do.call(rbind, lapply(trimestres, function(id) {
@@ -76,22 +79,21 @@ stl_fit <- stl(ts(log(sipa), frequency = 12), s.window = "periodic", robust = TR
 desest_sipa <- exp(stl_fit$time.series[, "trend"] + stl_fit$time.series[, "remainder"])
 names(desest_sipa) <- names(sipa)
 priv <- rebase_index(desest_sipa, names(desest_sipa))
-# SIPA provisional de la SST (lo que usa Equilibra) para los meses recientes:
-#  - may-26: nominal -0.8% m/m (real desest -2.9% + IPC 2.1%); la definitiva 153.1 da
-#    -4.9% nominal (real -6.3%), mucho mas volatil que el -2.1% que reporta Equilibra.
-#  - jun-26: anticipado +1.0% nominal (real desest -0.9% + IPC 1.9%), mes sin definitiva.
-priv[["2026-05"]] <- priv[["2026-04"]] * (1 - 0.8 / 100)
-priv[["2026-06"]] <- priv[["2026-05"]] * 1.01
 
-# m/m del IST publicados por INDEC (CSV oficial, hasta jun-26): se usan para extender
-# la serie de niveles de la API (que llega a abr-26) con el propio IST.
+# m/m del IST publicados por INDEC (CSV oficial): se usan para extender las series
+# de niveles de la API (que llegan con rezago) con el propio IST.
 istv <- read.csv(file.path(repo_root, "data", "raw", "salarios", "variacion_indice_salarios.csv"),
                  sep = ";", dec = ",", na.strings = "NA")
 istv$mes <- format(as.Date(istv$periodo, "%d/%m/%Y"), "%Y-%m")
 mm_ist_pub <- setNames(istv$v_m_sector_publico, istv$mes)
+mm_ist_priv <- setNames(istv$v_m_sector_privado_registrado, istv$mes)
 
 extender_ist <- function(idx, mm_ist) {
   last <- max(names(idx)[!is.na(idx)])
+  # agrega los meses que publica el IST y todavia no estan en la serie
+  faltan <- setdiff(names(mm_ist)[names(mm_ist) > last], names(idx))
+  idx <- c(idx, setNames(rep(NA_real_, length(faltan)), faltan))
+  idx <- idx[order(names(idx))]
   for (m in names(idx)[names(idx) > last]) {
     if (!m %in% names(mm_ist) || is.na(mm_ist[[m]])) {
       idx[[m]] <- idx[[last]]
@@ -103,6 +105,8 @@ extender_ist <- function(idx, mm_ist) {
   idx
 }
 
+# Cola del privado cuando el SIPA todavia no publico: m/m del IST privado registrado.
+priv <- extender_ist(priv, mm_ist_priv)
 pub <- extender_ist(rebase_index(admin$ist_nom_pub, admin$mes), mm_ist_pub)
 
 jm <- setNames(

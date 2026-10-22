@@ -14,10 +14,11 @@
 
 repo_root <- getOption("repo_root", ".")
 source(file.path(repo_root, "R", "rebase_index.R"))
+source(file.path(repo_root, "R", "pipeline_hasta.R"))
 
 ventana <- sprintf("2023-0%d", 1:9)
 desde <- "2017-01"
-hasta <- "2026-06"
+hasta <- pipeline_hasta(repo_root)
 meses <- format(seq(as.Date(paste0(desde, "-01")), as.Date(paste0(hasta, "-01")), by = "month"), "%Y-%m")
 
 ## 1) Ingreso nominal
@@ -32,22 +33,26 @@ stl_fit <- stl(ts(log(sipa), frequency = 12), s.window = "periodic", robust = TR
 desest <- exp(stl_fit$time.series[, "trend"] + stl_fit$time.series[, "remainder"])
 names(desest) <- names(sipa)
 priv <- rebase_index(desest, names(desest))
-priv[["2026-05"]] <- priv[["2026-04"]] * (1 - 0.8 / 100)
-priv[["2026-06"]] <- priv[["2026-05"]] * 1.01
 
 # publico: IST publico nominal + cola con su m/m (idem script 03)
 istv <- read.csv(file.path(repo_root, "data", "raw", "salarios", "variacion_indice_salarios.csv"),
                  sep = ";", dec = ",", na.strings = "NA")
 istv$mes <- format(as.Date(istv$periodo, "%d/%m/%Y"), "%Y-%m")
 mm_ist_pub <- setNames(istv$v_m_sector_publico, istv$mes)
+mm_ist_priv <- setNames(istv$v_m_sector_privado_registrado, istv$mes)
 extender_ist <- function(idx, mm_ist) {
   last <- max(names(idx)[!is.na(idx)])
+  # agrega los meses que publica el IST y todavia no estan en la serie
+  faltan <- setdiff(names(mm_ist)[names(mm_ist) > last], names(idx))
+  idx <- c(idx, setNames(rep(NA_real_, length(faltan)), faltan))
+  idx <- idx[order(names(idx))]
   for (m in names(idx)[names(idx) > last]) {
     idx[[m]] <- if (!m %in% names(mm_ist) || is.na(mm_ist[[m]])) idx[[last]] else idx[[last]] * (1 + mm_ist[[m]] / 100)
     last <- m
   }
   idx
 }
+priv <- extender_ist(priv, mm_ist_priv)
 pub <- extender_ist(rebase_index(admin$ist_nom_pub, admin$mes), mm_ist_pub)
 
 # jubilados: 2017..2022 con el haber minimo + bono ANSES encadenado al 2023-01 del
@@ -87,7 +92,7 @@ I <- setNames(lapply(cols, function(cc) setNames(ipc_series[[cc]], ipc_series$me
 w17 <- divs$peso / sum(divs$peso)
 # division 04 reponderada por grupos con aperturas CABA (idem script 05)
 leer_caba <- function(archivo, f1, f2) {
-  raw <- read.csv(archivo, fileEncoding = "latin1", check.names = FALSE)
+  raw <- read.csv(archivo, fileEncoding = "UTF-8", check.names = FALSE)
   fc <- format(as.Date(as.character(unlist(raw[f1, -1])), "%m/%d/%Y"), "%Y-%m")
   m <- as.matrix(raw[f2:nrow(raw), -1]); mode(m) <- "numeric"
   rownames(m) <- trimws(as.character(raw[f2:nrow(raw), 1])); colnames(m) <- fc; m

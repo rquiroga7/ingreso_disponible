@@ -14,9 +14,11 @@
 
 repo_root <- getOption("repo_root", ".")
 source(file.path(repo_root, "R", "rebase_index.R"))
+source(file.path(repo_root, "R", "pipeline_hasta.R"))
 
+hasta <- pipeline_hasta(repo_root)
 ventana <- sprintf("2023-0%d", 1:9)
-target <- format(seq(as.Date("2023-01-01"), as.Date("2026-06-01"), by = "month"), "%Y-%m")
+target <- format(seq(as.Date("2023-01-01"), as.Date(paste0(hasta, "-01")), by = "month"), "%Y-%m")
 
 ynom <- read.csv(file.path(repo_root, "data", "work", "ynom_mensual.csv"))
 ipc17 <- setNames(read.csv(file.path(repo_root, "data", "work", "ipc2017.csv"))$ipc2017_rel,

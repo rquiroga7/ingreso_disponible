@@ -19,9 +19,11 @@
 
 repo_root <- getOption("repo_root", ".")
 source(file.path(repo_root, "R", "rebase_index.R"))
+source(file.path(repo_root, "R", "pipeline_hasta.R"))
 
+hasta <- pipeline_hasta(repo_root)
 ventana <- sprintf("2023-0%d", 1:9)
-target <- format(seq(as.Date("2023-01-01"), as.Date("2026-06-01"), by = "month"), "%Y-%m")
+target <- format(seq(as.Date("2023-01-01"), as.Date(paste0(hasta, "-01")), by = "month"), "%Y-%m")
 
 ## 1) IST variaciones por subsector (cache-first)
 cache_csv <- file.path(repo_root, "data", "raw", "salarios", "variacion_indice_salarios.csv")
@@ -82,8 +84,8 @@ w_nac <- sum(pn234[est234 & a1234 == 1]) / sum(pn234[est234 & a1234 %in% c(1, 2,
 pub_total <- rebase_index(istv$v_m_sector_publico |> encadenar(), istv$mes)
 mezcla <- w_nac * pub_nac + (1 - w_nac) * pub_prov
 cat(sprintf("Pesos publico (EPH t234): nacional %.1f%% / provincial+municipal %.1f%%\n", w_nac * 100, (1 - w_nac) * 100))
-cat(sprintf("Cross-check jun-26: mezcla nac+prov %.1f vs publico total %.1f (dif %+.1f%%)\n",
-            mezcla[["2026-06"]], pub_total[["2026-06"]], (mezcla[["2026-06"]] / pub_total[["2026-06"]] - 1) * 100))
+cat(sprintf("Cross-check %s: mezcla nac+prov %.1f vs publico total %.1f (dif %+.1f%%)\n", hasta,
+            mezcla[[hasta]], pub_total[[hasta]], (mezcla[[hasta]] / pub_total[[hasta]] - 1) * 100))
 
 ## 4) Disponible por segmento: disp = B_seg * (1 - s(t)); s(t) de scripts/06 (ENGHo + precios relativos)
 sdf <- read.csv(file.path(repo_root, "data", "work", "s_canasta_fija.csv"))
@@ -147,5 +149,5 @@ cat("Gráfico: output/grafico_disponible_segmentos.png\n")
 cat("Anclas por segmento:\n")
 for (s in c("disp_priv", "disp_nac", "disp_prov", "disp_univ")) {
   d <- get(s)
-  cat(sprintf("  %-10s feb-24 %.1f | jun-25 %.1f | jun-26 %.1f\n", s, d[["2024-02"]], d[["2025-06"]], d[["2026-06"]]))
+  cat(sprintf("  %-10s feb-24 %.1f | jun-25 %.1f | %s %.1f\n", s, d[["2024-02"]], d[["2025-06"]], hasta, d[[hasta]]))
 }

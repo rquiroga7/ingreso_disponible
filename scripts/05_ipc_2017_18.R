@@ -15,6 +15,8 @@
 
 repo_root <- getOption("repo_root", ".")
 source(file.path(repo_root, "R", "rebase_index.R"))
+source(file.path(repo_root, "R", "pipeline_hasta.R"))
+hasta <- pipeline_hasta(repo_root)
 
 ipc <- read.csv(file.path(repo_root, "data", "work", "ipc_series.csv"))
 ipc$mes <- format(as.Date(ipc$fecha), "%Y-%m")
@@ -33,7 +35,7 @@ w17 <- divs$peso / sum(divs$peso)
 
 ## Division 04 a nivel de grupo con aperturas CABA (ENGHo 17/18)
 leer_caba <- function(archivo, f1, f2) {
-  raw <- read.csv(archivo, fileEncoding = "latin1", check.names = FALSE)
+  raw <- read.csv(archivo, fileEncoding = "UTF-8", check.names = FALSE)
   fc <- format(as.Date(as.character(unlist(raw[f1, -1])), "%m/%d/%Y"), "%Y-%m")
   m <- as.matrix(raw[f2:nrow(raw), -1]); mode(m) <- "numeric"
   rownames(m) <- trimws(as.character(raw[f2:nrow(raw), 1])); colnames(m) <- fc; m
@@ -70,7 +72,7 @@ I[["div04_vivienda"]] <- div04_17
 
 ## IPC17 = media ponderada de divisiones (con div04 reponderada por grupos)
 meses <- Reduce(intersect, list(names(I[[1]]), colnames(nuevo)))
-meses <- meses[meses >= ventana[1] & meses <= "2026-06"]
+meses <- meses[meses >= ventana[1] & meses <= hasta]
 ipc2017 <- rebase_index(Reduce(`+`, Map(function(Ii, wi) Ii[meses] * wi, I, w17)), meses)
 
 ynom <- read.csv(file.path(repo_root, "data", "work", "ynom_mensual.csv"))
